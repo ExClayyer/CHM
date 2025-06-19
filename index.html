@@ -1,691 +1,91 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="https://i.yapx.ru/ZZ0Gw.png" type="png">
-    <title>Решение дифференциальных уравнений</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Слайдер</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: 
-    linear-gradient(315deg, 
-        #1a2f4d -10%, 
-        #2a4b7a 25%, 
-        #4a86e8 70%, 
-        #a2d3ff 120%);
-
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 60px;
-        }
-        header {
-            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-            text-align: center;
+        .slider-container {
+            width: 600px;
+            height: 400px;
             position: relative;
             overflow: hidden;
+            margin: 20px auto;
+            border: 1px solid #ddd;
         }
-        header::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            z-index: 0;
+        
+        .slider {
+            display: flex;
+            height: 100%;
+            transition: transform 0.4s ease;
         }
-        h1 {
-            margin: 0;
-            font-size: 2.4rem;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        
+        .slide {
+            min-width: 100%;
         }
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-top: 8px;
-            position: relative;
-            z-index: 1;
-        }
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        @media (max-width: 900px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s ease;
-            border: none;
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #3498db, #2c3e50);
-        }
-        .card:hover {
-            transform: translateY(-7px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-        }
-        .card h2 {
-            color: #2c3e50;
-            padding-bottom: 12px;
-            margin-top: 0;
-            font-size: 1.8rem;
-            border-bottom: 2px solid #e0e7ff;
-            position: relative;
-        }
-        .card h2::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: #3498db;
-        }
-        .input-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        label {
+        
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 1.05rem;
         }
-        input, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #d0d8e8;
-            border-radius: 8px;
-            font-size: 1.05rem;
-            box-sizing: border-box;
-            transition: all 0.3s;
-            background: #f8faff;
-        }
-        input:focus, select:focus {
-            border-color: #4a6491;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(74, 100, 145, 0.2);
-            background: white;
-        }
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .button-group button {
-            flex: 1;
-        }
-        button {
+        
+        .prev, .next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
             color: white;
             border: none;
-            padding: 14px 25px;
-            border-radius: 8px;
+            padding: 10px 15px;
             cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font-size: 20px;
         }
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-        #solveBtn {
-            background: linear-gradient(135deg, #1a73e8, #0d47a1);
-        }
-        #solveBtn:hover {
-            background: linear-gradient(135deg, #1669c8, #0b3d91);
-        }
-        #clearBtn {
-            background: linear-gradient(135deg, #6c757d, #495057);
-        }
-        #clearBtn:hover {
-            background: linear-gradient(135deg, #5a6268, #3d4348);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 0.95rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        th {
-            background: linear-gradient(135deg, #4a6491, #2c3e50);
-            color: white;
-            padding: 14px;
-            text-align: left;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e7ff;
-        }
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-        tr:hover {
-            background-color: #edf2ff;
-        }
-        .results-container {
-            max-height: 400px;
-            overflow-y: auto;
-            border-radius: 10px;
-            border: 1px solid #e0e7ff;
-            scrollbar-width: thin;
-            scrollbar-color: #3498db #f0f0f0;
-        }
-        .results-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .results-container::-webkit-scrollbar-track {
-            background: #f0f0f0;
-            border-radius: 10px;
-        }
-        .results-container::-webkit-scrollbar-thumb {
-            background: #3498db;
-            border-radius: 10px;
-        }
-        .chart-container {
-            height: 450px;
-            margin-top: 25px;
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e0e7ff;
-        }
-        .equation-display {
-            background: linear-gradient(135deg, #e8f4fd 0%, #d6e8ff 100%);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 5px solid #3498db;
-            position: relative;
-        }
-        .equation-display h4 {
-            margin-top: 0;
-            color: #2c3e50;
-            font-size: 1.3rem;
-            margin-bottom: 12px;
-        }
-        .equation-display p {
-            margin: 8px 0;
-            font-size: 1.1rem;
-        }
-        .highlight {
-            background-color: #fff8e6;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            border: 1px dashed #ffc107;
-        }
-        .tables-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 10px;
-        }
-        .table-wrapper {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        .table-title {
-            background: linear-gradient(135deg, #4a6491, #2c3e50);
-            color: white;
-            padding: 12px;
-            font-weight: 600;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-        footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
-            text-align: center;
-            font-size: 1rem;
-            color: #ffffff;
-        }
-        .company-name {
-            font-weight: 700;
-            color: #000000;
-            position: relative;
-            display: inline-block;
-        }
-        .company-name::after {
-            position: absolute;
-            bottom: -20px;
-            left: 0;
-            width: 100%;
-            height: 10px;
-            background: linear-gradient(90deg, transparent, #3498db, transparent);
-        }
+        
+        .prev { left: 10px; }
+        .next { right: 10px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Решение дифференциальных уравнений</h1>
-        <p class="subtitle">Метод Рунге-Кутты 4-го порядка с двойным шагом</p>
-    </header>
-
-    <div class="container">
-        <div class="card">
-            <h2>Параметры уравнения</h2>
-            
-            <div class="input-group">
-                <label for="equation">Дифференциальное уравнение (y' = f(x, y)):</label>
-                <input type="text" id="equation" value="" placeholder="(x + y)**2 - 3*x*y">
-            </div>
-            
-            <div class="input-group">
-                <label for="start">Начало интервала (x₀):</label>
-                <input type="number" id="start" step="0.1" value="" placeholder="1.6">
-            </div>
-            
-            <div class="input-group">
-                <label for="y0">Начальное значение y (y₀):</label>
-                <input type="number" id="y0" step="0.1" value="" placeholder="4.6">
-            </div>
-            
-            <div class="input-group">
-                <label for="end">Конец интервала (x₁):</label>
-                <input type="number" id="end" step="0.1" value="" placeholder="2.6">
-            </div>
-            
-            <div class="input-group">
-                <label for="step1">Шаг h₁:</label>
-                <input type="number" id="step1" step="0.01" min="0.001" value="" placeholder="0.2">
-            </div>
-            
-            <div class="input-group">
-                <label for="step2">Шаг h₂:</label>
-                <input type="number" id="step2" step="0.01" min="0.001" value="" placeholder="0.1">
-            </div>
-            
-            <div class="button-group">
-                <button id="solveBtn" onclick="solveEquation()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
-                    </svg>
-                    Решить уравнение
-                </button>
-                <button id="clearBtn" onclick="clearInputs()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                    </svg>
-                    Очистить
-                </button>
-            </div>
-            
-            <div class="equation-display">
-                <h4>Ваше уравнение</h4>
-                <p>y' = <span class="highlight" id="displayEquation">(x + y)**2 - 3*x*y</span></p>
-                <p>Начальные условия: x₀ = <span class="highlight" id="displayX0">1.6</span>, y₀ = <span class="highlight" id="displayY0">4.6</span></p>
-                <p>Интервал: [<span class="highlight" id="displayStart">1.6</span>, <span class="highlight" id="displayEnd">2.6</span>]</p>
-                <p>Шаги: h₁ = <span class="highlight" id="displayStep1">0.2</span>, h₂ = <span class="highlight" id="displayStep2">0.1</span></p>
-            </div>
+    <div class="slider-container">
+        <div class="slider">
+            <div class="slide"><img src="https://i.postimg.cc/LXMkfx63/2025-06-10-234011219.png" alt="Image 1"></div>
+            <div class="slide"><img src="https://i.postimg.cc/rs9LcZzn/2025-06-19-233137720.png" alt="Image 2"></div>
+            <div class="slide"><img src="https://i.postimg.cc/DyBKMN9m/2025-06-19-233205460.png" alt="Image 3"></div>
+            <div class="slide"><img src="https://i.postimg.cc/wjrY6mTp/2025-06-19-233219098.png" alt="Image 4"></div>
+            <div class="slide"><img src="https://i.postimg.cc/FFxtYqsG/2025-06-19-233251361.png" alt="Image 5"></div>
+            <div class="slide"><img src="https://i.postimg.cc/J47fZqs8/2025-06-19-233312214.png" alt="Image 6"></div>
         </div>
         
-        <div class="card">
-            <h2>Результаты вычислений</h2>
-            
-            <div class="tables-container">
-                <div class="table-wrapper">
-                    <div class="table-title">Решение с шагом h₁ = <span id="h1Value">0.2</span></div>
-                    <div class="results-container">
-                        <table id="resultsTable1">
-                            <thead>
-                                <tr>
-                                    <th>x</th>
-                                    <th>y</th>
-                                </tr>
-                            </thead>
-                            <tbody id="resultsBody1">
-                                <tr><td colspan="2">Введите параметры и нажмите "Решить уравнение"</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="table-wrapper">
-                    <div class="table-title">Решение с шагом h₂ = <span id="h2Value">0.1</span></div>
-                    <div class="results-container">
-                        <table id="resultsTable2">
-                            <thead>
-                                <tr>
-                                    <th>x</th>
-                                    <th>y</th>
-                                </tr>
-                            </thead>
-                            <tbody id="resultsBody2">
-                                <tr><td colspan="2">Введите параметры и нажмите "Решить уравнение"</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <h3>График решения</h3>
-            <div class="chart-container">
-                <canvas id="solutionChart"></canvas>
-            </div>
-        </div>
+        <button class="prev">❮</button>
+        <button class="next">❯</button>
     </div>
 
-    <footer>
-        Создано компанией <span class="company-name">"Patau Industries"</span> для использования на численных методах
-    </footer>
-
     <script>
-        let solutionChart = null;
+        const slider = document.querySelector('.slider');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.querySelector('.prev');
+        const nextBtn = document.querySelector('.next');
         
-        function solveEquation() {
-            // Получаем параметры из формы
-            const equation = document.getElementById('equation').value;
-            const x0 = parseFloat(document.getElementById('start').value);
-            const y0 = parseFloat(document.getElementById('y0').value);
-            const x1 = parseFloat(document.getElementById('end').value);
-            const h1 = parseFloat(document.getElementById('step1').value);
-            const h2 = parseFloat(document.getElementById('step2').value);
-            
-            // Обновляем отображение уравнения
-            document.getElementById('displayEquation').textContent = equation;
-            document.getElementById('displayX0').textContent = x0;
-            document.getElementById('displayY0').textContent = y0;
-            document.getElementById('displayStart').textContent = x0;
-            document.getElementById('displayEnd').textContent = x1;
-            document.getElementById('displayStep1').textContent = h1;
-            document.getElementById('displayStep2').textContent = h2;
-            document.getElementById('h1Value').textContent = h1;
-            document.getElementById('h2Value').textContent = h2;
-            
-            try {
-                // Создаем функцию из введенного уравнения
-                const f = new Function('x', 'y', `return ${equation};`);
-                
-                // Вычисляем решения методом Рунге-Кутты
-                const solution1 = solveDE(f, x0, x1, x0, y0, h1);
-                const solution2 = solveDE(f, x0, x1, x0, y0, h2);
-                
-                // Отображаем результаты
-                displayResults(solution1, solution2);
-                
-                // Строим график
-                plotSolution(solution1, solution2, h1, h2);
-                
-            } catch (error) {
-                document.getElementById('resultsBody1').innerHTML = 
-                    `<tr><td colspan="2" style="color:red;">Ошибка: ${error.message}</td></tr>`;
-                document.getElementById('resultsBody2').innerHTML = '';
-                console.error(error);
-            }
+        let currentIndex = 0;
+        const totalSlides = slides.length;
+        
+        function updateSlider() {
+            slider.style.transform = `translateX(-${currentIndex * 100}%)`;
         }
         
-        function clearInputs() {
-            // Очищаем все поля ввода
-            document.getElementById('equation').value = '';
-            document.getElementById('start').value = '';
-            document.getElementById('y0').value = '';
-            document.getElementById('end').value = '';
-            document.getElementById('step1').value = '';
-            document.getElementById('step2').value = '';
-            
-            // Сбрасываем отображение уравнения
-            document.getElementById('displayEquation').textContent = '';
-            document.getElementById('displayX0').textContent = '';
-            document.getElementById('displayY0').textContent = '';
-            document.getElementById('displayStart').textContent = '';
-            document.getElementById('displayEnd').textContent = '';
-            document.getElementById('displayStep1').textContent = '';
-            document.getElementById('displayStep2').textContent = '';
-            document.getElementById('h1Value').textContent = '';
-            document.getElementById('h2Value').textContent = '';
-            
-            // Очищаем таблицы
-            document.getElementById('resultsBody1').innerHTML = 
-                `<tr><td colspan="2">Введите параметры и нажмите "Решить уравнение"</td></tr>`;
-            document.getElementById('resultsBody2').innerHTML = 
-                `<tr><td colspan="2">Введите параметры и нажмите "Решить уравнение"</td></tr>`;
-            
-            // Удаляем график
-            if (solutionChart) {
-                solutionChart.destroy();
-                solutionChart = null;
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
             }
-        }
+        });
         
-        function solveDE(f, a, b, x0, y0, h) {
-            const points = [{x: x0, y: y0}];
-            let x = x0;
-            let y = y0;
-            
-            // Количество шагов
-            const n = Math.floor((b - a) / h);
-            
-            for (let i = 0; i < n; i++) {
-                // Метод Рунге-Кутты 4-го порядка
-                const k1 = h * f(x, y);
-                const k2 = h * f(x + h/2, y + k1/2);
-                const k3 = h * f(x + h/2, y + k2/2);
-                const k4 = h * f(x + h, y + k3);
-                
-                y = y + (k1 + 2*k2 + 2*k3 + k4)/6;
-                x = x + h;
-                
-                points.push({
-                    x: parseFloat(x.toFixed(10)),
-                    y: Math.abs(y) > 1e10 ? (y > 0 ? Infinity : -Infinity) : parseFloat(y.toFixed(10))
-                });
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < totalSlides - 1) {
+                currentIndex++;
+                updateSlider();
             }
-            
-            return points;
-        }
-        
-        function displayResults(sol1, sol2) {
-            const tbody1 = document.getElementById('resultsBody1');
-            const tbody2 = document.getElementById('resultsBody2');
-            
-            tbody1.innerHTML = '';
-            tbody2.innerHTML = '';
-            
-            // Заполняем первую таблицу
-            for (let i = 0; i < sol1.length; i++) {
-                const row = document.createElement('tr');
-                
-                const xCell = document.createElement('td');
-                xCell.textContent = sol1[i].x.toFixed(5);
-                row.appendChild(xCell);
-                
-                const yCell = document.createElement('td');
-                yCell.textContent = formatNumber(sol1[i].y);
-                row.appendChild(yCell);
-                
-                tbody1.appendChild(row);
-            }
-            
-            // Заполняем вторую таблицу
-            for (let i = 0; i < sol2.length; i++) {
-                const row = document.createElement('tr');
-                
-                const xCell = document.createElement('td');
-                xCell.textContent = sol2[i].x.toFixed(5);
-                row.appendChild(xCell);
-                
-                const yCell = document.createElement('td');
-                yCell.textContent = formatNumber(sol2[i].y);
-                row.appendChild(yCell);
-                
-                tbody2.appendChild(row);
-            }
-        }
-        
-        function formatNumber(value) {
-            if (value === Infinity) return '∞';
-            if (value === -Infinity) return '-∞';
-            if (Math.abs(value) > 1e6) return value.toExponential(4);
-            if (Math.abs(value) < 0.0001 && value !== 0) return value.toExponential(4);
-            return value.toFixed(6);
-        }
-        
-        function plotSolution(sol1, sol2, h1, h2) {
-            const ctx = document.getElementById('solutionChart').getContext('2d');
-            
-            // Удаляем предыдущий график, если он существует
-            if (solutionChart) {
-                solutionChart.destroy();
-            }
-            
-            // Форматируем данные для Chart.js
-            const dataset1 = {
-                label: `Решение (шаг h₁ = ${h1})`,
-                data: sol1.map(p => ({x: p.x, y: p.y})),
-                borderColor: 'rgb(65, 105, 225)',
-                backgroundColor: 'rgba(65, 105, 225, 0.1)',
-                borderWidth: 3,
-                pointRadius: 4,
-                pointBackgroundColor: 'rgb(65, 105, 225)',
-                fill: false,
-                tension: 0.1
-            };
-            
-            const dataset2 = {
-                label: `Решение (шаг h₂ = ${h2})`,
-                data: sol2.map(p => ({x: p.x, y: p.y})),
-                borderColor: 'rgb(220, 20, 60)',
-                backgroundColor: 'rgba(220, 20, 60, 0.1)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: 'rgb(220, 20, 60)',
-                fill: false,
-                tension: 0.1
-            };
-            
-            // Создаем новый график
-            solutionChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [dataset1, dataset2]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            position: 'bottom',
-                            title: {
-                                display: true,
-                                text: 'x',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        y: {
-                            type: 'linear',
-                            title: {
-                                display: true,
-                                text: 'y',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 13
-                                }
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Сравнение решений с разными шагами',
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `y = ${formatNumber(context.parsed.y)}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Инициализация при загрузке
-        window.onload = function() {
-            // Автоматическое решение для примера
-            setTimeout(function() {
-                // Устанавливаем демо-значения
-                document.getElementById('equation').value = '(x + y)**2 - 3*x*y';
-                document.getElementById('start').value = '1.6';
-                document.getElementById('y0').value = '4.6';
-                document.getElementById('end').value = '2.6';
-                document.getElementById('step1').value = '0.2';
-                document.getElementById('step2').value = '0.1';
-                
-                // Запускаем решение
-                solveEquation();
-            }, 500);
-        };
+        });
     </script>
 </body>
 </html>
