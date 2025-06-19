@@ -1,91 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Слайдер</title>
+    <title>Угадай число с приколом</title>
     <style>
-        .slider-container {
-            width: 600px;
-            height: 400px;
-            position: relative;
-            overflow: hidden;
-            margin: 20px auto;
-            border: 1px solid #ddd;
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            text-align: center;
+            background: url('https://cdn.dribbble.com/users/1712260/screenshots/9836031/chip_dribbble.gif');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
         }
-        
-        .slider {
-            display: flex;
-            height: 100%;
-            transition: transform 0.4s ease;
+        .container {
+            margin-top: 20%;
         }
-        
-        .slide {
-            min-width: 100%;
+        input, button {
+            padding: 10px;
+            font-size: 32px;
+            margin: 10px;
         }
-        
-        .slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-        
-        .prev, .next {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
+        #message {
             font-size: 20px;
+            height: 30px;
+            margin: 20px;
         }
-        
-        .prev { left: 10px; }
-        .next { right: 10px; }
+        #counter {
+            font-weight: bold;
+            color: red;
+        }
     </style>
 </head>
 <body>
-    <div class="slider-container">
-        <div class="slider">
-            <div class="slide"><img src="https://i.postimg.cc/LXMkfx63/2025-06-10-234011219.png" alt="Image 1"></div>
-            <div class="slide"><img src="https://i.postimg.cc/rs9LcZzn/2025-06-19-233137720.png" alt="Image 2"></div>
-            <div class="slide"><img src="https://i.postimg.cc/DyBKMN9m/2025-06-19-233205460.png" alt="Image 3"></div>
-            <div class="slide"><img src="https://i.postimg.cc/wjrY6mTp/2025-06-19-233219098.png" alt="Image 4"></div>
-            <div class="slide"><img src="https://i.postimg.cc/FFxtYqsG/2025-06-19-233251361.png" alt="Image 5"></div>
-            <div class="slide"><img src="https://i.postimg.cc/J47fZqs8/2025-06-19-233312214.png" alt="Image 6"></div>
-        </div>
+    <div class="container">
+        <h1>Угадай число от 1 до 100!</h1>
+        <p>Компьютер загадал число... а ты угадаешь?</p>
         
-        <button class="prev">❮</button>
-        <button class="next">❯</button>
+        <input type="number" id="guess" min="1" max="100" placeholder="Твой вариант">
+        <button onclick="checkGuess()">Проверить!</button>
+        
+        <div id="message">Жду твоей попытки!</div>
+        <div>Попыток: <span id="counter">0</span></div>
     </div>
 
     <script>
-        const slider = document.querySelector('.slider');
-        const slides = document.querySelectorAll('.slide');
-        const prevBtn = document.querySelector('.prev');
-        const nextBtn = document.querySelector('.next');
-        
-        let currentIndex = 0;
-        const totalSlides = slides.length;
-        
-        function updateSlider() {
-            slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        const secretNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+        const jokes = [
+            "25%? Да это же бред...",
+            "Ну, может быть это было близко.",
+            "Ты близок как никогда... или нет?",
+            "70%! я 4 раза миссую , что это?!",
+            "Что ж это за число такое..."
+        ];
+
+        function checkGuess() {
+            const guess = parseInt(document.getElementById('guess').value);
+            attempts++;
+            document.getElementById('counter').textContent = attempts;
+            
+            if (guess === secretNumber) {
+                const reaction = attempts < 5 ? "ГЕНИЙ!" : 
+                                attempts < 10 ? "Неплохо!" : "Фух... наконец-то!";
+                document.getElementById('message').innerHTML = 
+                    `✅ Правильно! ${reaction}<br>Загаданное число: ${secretNumber}`;
+                return;
+            }
+            
+            const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+            const hint = guess < secretNumber ? 
+                `📈 БОЛЬШЕ! (${randomJoke})` : 
+                `📉 МЕНЬШЕ! (${randomJoke})`;
+            
+            document.getElementById('message').innerHTML = hint;
+            document.getElementById('guess').value = '';
         }
-        
-        prevBtn.addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSlider();
-            }
-        });
-        
-        nextBtn.addEventListener('click', () => {
-            if (currentIndex < totalSlides - 1) {
-                currentIndex++;
-                updateSlider();
-            }
-        });
     </script>
 </body>
 </html>
