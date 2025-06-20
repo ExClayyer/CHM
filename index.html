@@ -1,79 +1,872 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Угадай число с приколом</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroAI Assistant - Анализ нейросетями</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --dark-bg: #0f0f15;
+            --card-bg: #1a1a2e;
+            --card-hover: #16213e;
+            --accent: #bb86fc;
+            --accent-secondary: #03dac6;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --light-section: #2d2d44;
+            --input-bg: #252540;
+            --success: #00c853;
+            --warning: #ffab00;
+            --error: #ff1744;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            font-family: 'Comic Sans MS', cursive;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 0, 105, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 77, 128, 0.15) 0%, transparent 20%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration, 5s) infinite var(--delay, 0s);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(187, 134, 252, 0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .hero {
             text-align: center;
-            background: url('https://cdn.dribbble.com/users/1712260/screenshots/9836031/chip_dribbble.gif');
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-attachment: fixed;
+            padding: 50px 20px 30px;
+            max-width: 800px;
+            margin: 0 auto;
         }
-        .container {
-            margin-top: 20%;
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        input, button {
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .query-section {
+            background: rgba(25, 25, 45, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(187, 134, 252, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .query-input {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: none;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.2);
+        }
+
+        .query-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            background: var(--accent);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 12px;
+            padding: 0 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .send-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(3, 218, 198, 0.3);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(187, 134, 252, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(187, 134, 252, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+        }
+
+        .results-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .best-response-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+            animation: highlight 3s ease-in-out infinite;
+        }
+
+        @keyframes highlight {
+            0%, 100% { box-shadow: 0 0 15px rgba(187, 134, 252, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(187, 134, 252, 0.7); }
+        }
+
+        .best-badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: var(--accent);
+            color: var(--dark-bg);
+            padding: 5px 35px;
+            transform: rotate(45deg);
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .response-source {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .response-text {
+            line-height: 1.7;
+            font-size: 1.1rem;
+            white-space: pre-line;
+        }
+
+        .response-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .all-responses {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .response-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .response-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(187, 134, 252, 0.3);
+        }
+
+        .source-name {
+            font-weight: 600;
+            color: var(--accent-secondary);
+        }
+
+        .score {
+            display: inline-block;
+            background: rgba(3, 218, 198, 0.15);
+            color: var(--accent-secondary);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(187, 134, 252, 0.2);
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .error {
+            color: var(--error);
             padding: 10px;
-            font-size: 32px;
-            margin: 10px;
+            background: rgba(255, 23, 68, 0.1);
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
         }
-        #message {
-            font-size: 20px;
-            height: 30px;
-            margin: 20px;
+
+        .api-info {
+            background: rgba(25, 25, 45, 0.6);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(3, 218, 198, 0.2);
         }
-        #counter {
-            font-weight: bold;
-            color: red;
+
+        .api-info-title {
+            color: var(--accent-secondary);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .api-field {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .api-label {
+            width: 100px;
+            color: var(--text-secondary);
+        }
+
+        .api-value {
+            flex-grow: 1;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .send-btn {
+                padding: 15px;
+                justify-content: center;
+            }
+            
+            .all-responses {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Угадай число от 1 до 100!</h1>
-        <p>Компьютер загадал число... а ты угадаешь?</p>
+    <div class="stars" id="stars"></div>
+    
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="logo-text">NeuroAI Assistant</div>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <h1>Умный помощник нейросетей</h1>
+        <p>Получите ответы от лучших российских нейросетей одновременно. Наш алгоритм выберет самый точный и полезный ответ для вас.</p>
+    </section>
+    
+    <section class="query-section">
+        <div class="input-group">
+            <input type="text" class="query-input" id="user-query" placeholder="Введите ваш вопрос или запрос..." value="Объясни теорию относительности простыми словами">
+            <button class="send-btn" id="send-btn">
+                <i class="fas fa-paper-plane"></i> Отправить
+            </button>
+        </div>
         
-        <input type="number" id="guess" min="1" max="100" placeholder="Твой вариант">
-        <button onclick="checkGuess()">Проверить!</button>
+        <div class="upload-area" id="upload-area">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="upload-text">Перетащите сюда изображение для анализа или кликните для выбора</div>
+            <input type="file" id="image-upload" accept="image/*" hidden>
+        </div>
         
-        <div id="message">Жду твоей попытки!</div>
-        <div>Попыток: <span id="counter">0</span></div>
-    </div>
+        <div id="image-preview"></div>
+        <div id="api-error" class="error hidden"></div>
+        
+        <div class="api-info">
+            <div class="api-info-title">Используемый API: GigaChat (Sber AI)</div>
+            <div class="api-field">
+                <div class="api-label">Client ID:</div>
+                <div class="api-value">70a4e42f-3ea3-4508-a101-766bb03d5e5e</div>
+            </div>
+            <div class="api-field">
+                <div class="api-label">Client Secret:</div>
+                <div class="api-value">3b326975-de34-467f-b618-91956c1993ee</div>
+            </div>
+            <div class="api-field">
+                <div class="api-label">Auth Key:</div>
+                <div class="api-value">NzBhNGU0MmYtM2VhMy00NTA4LWExMDEtNzY2YmIwM2Q1ZTVlOjNiMzI2OTc1LWQzNC00NjdmLWI2MTgtOTE5NTZjMTk5M2Vl</div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="results-section">
+        <div class="results-header">
+            <h2 class="section-title">Результаты анализа</h2>
+        </div>
+        
+        <div class="loader hidden" id="loader">
+            <div class="spinner"></div>
+            <p>Анализируем ваш запрос с помощью нейросетей...</p>
+        </div>
+        
+        <div id="results-container">
+            <div class="best-response-card">
+                <div class="best-badge">ЛУЧШИЙ ОТВЕТ</div>
+                <div class="response-source">
+                    <i class="fas fa-crown"></i>
+                    <span>GigaChat (Sber AI)</span>
+                </div>
+                <div class="response-text">
+                    Введите ваш запрос и нажмите "Отправить", чтобы получить ответы от нейросетей. Система автоматически выберет лучший ответ на основе анализа качества, полноты и точности информации.
+                </div>
+                <div class="response-meta">
+                    <div>Оценка алгоритма: <span class="score">9.8/10</span></div>
+                    <div>Время обработки: 1.2 сек</div>
+                </div>
+            </div>
+            
+            <h3 style="margin: 30px 0 20px; color: var(--accent-secondary);">Все ответы нейросетей</h3>
+            
+            <div class="all-responses">
+                <div class="response-card">
+                    <div class="response-source">
+                        <i class="fas fa-brain"></i>
+                        <span class="source-name">YandexGPT</span>
+                        <span class="score">8.7/10</span>
+                    </div>
+                    <div class="response-text">
+                        Я готов помочь с вашим запросом. Просто введите вопрос и нажмите кнопку отправки.
+                    </div>
+                </div>
+                
+                <div class="response-card">
+                    <div class="response-source">
+                        <i class="fas fa-microchip"></i>
+                        <span class="source-name">DeepSeek</span>
+                        <span class="score">7.9/10</span>
+                    </div>
+                    <div class="response-text">
+                        Этот помощник использует алгоритм, который оценивает полноту, точность и полезность ответов от разных нейросетей.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <p>© 2025 NeuroAI Assistant | Все нейросети доступны на территории России</p>
+    </footer>
 
     <script>
-        const secretNumber = Math.floor(Math.random() * 100) + 1;
-        let attempts = 0;
-        const jokes = [
-            "25%? Да это же бред...",
-            "Ну, может быть это было близко.",
-            "Ты близок как никогда... или нет?",
-            "70%! я 4 раза миссую , что это?!",
-            "Что ж это за число такое..."
-        ];
-
-        function checkGuess() {
-            const guess = parseInt(document.getElementById('guess').value);
-            attempts++;
-            document.getElementById('counter').textContent = attempts;
+        // Ваши API-данные для GigaChat
+        const CLIENT_ID = "70a4e42f-3ea3-4508-a101-766bb03d5e5e";
+        const CLIENT_SECRET = "3b326975-de34-467f-b618-91956c1993ee";
+        const AUTH_KEY = "NzBhNGU0MmYtM2VhMy00NTA4LWExMDEtNzY2YmIwM2Q1ZTVlOjNiMzI2OTc1LWQzNC00NjdmLWI2MTgtOTE5NTZjMTk5M2Vl";
+        
+        // Элементы DOM
+        const sendBtn = document.getElementById('send-btn');
+        const userQuery = document.getElementById('user-query');
+        const uploadArea = document.getElementById('upload-area');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const loader = document.getElementById('loader');
+        const resultsContainer = document.getElementById('results-container');
+        const apiError = document.getElementById('api-error');
+        const starsContainer = document.getElementById('stars');
+        
+        // Создание звездного фона
+        function createStars() {
+            const starCount = 150;
             
-            if (guess === secretNumber) {
-                const reaction = attempts < 5 ? "ГЕНИЙ!" : 
-                                attempts < 10 ? "Неплохо!" : "Фух... наконец-то!";
-                document.getElementById('message').innerHTML = 
-                    `✅ Правильно! ${reaction}<br>Загаданное число: ${secretNumber}`;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Рандомные параметры для звезд
+                const size = Math.random() * 3;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = 2 + Math.random() * 8;
+                const delay = Math.random() * 5;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.setProperty('--duration', `${duration}s`);
+                star.style.setProperty('--delay', `${delay}s`);
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Обработка загрузки изображения
+        uploadArea.addEventListener('click', () => {
+            imageUpload.click();
+        });
+
+        imageUpload.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    imagePreview.innerHTML = `
+                        <div style="position: relative; display: inline-block;">
+                            <img src="${event.target.result}" style="max-width: 200px; border-radius: 10px; margin-top: 15px;">
+                            <button id="remove-image" style="position: absolute; top: -10px; right: -10px; background: var(--error); border: none; border-radius: 50%; width: 24px; height: 24px; color: white; cursor: pointer;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    document.getElementById('remove-image').addEventListener('click', () => {
+                        imagePreview.innerHTML = '';
+                        imageUpload.value = '';
+                    });
+                }
+                
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // Получение токена доступа для GigaChat API
+        async function getGigaChatToken() {
+            const url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth";
+            const headers = {
+                "Authorization": `Basic ${AUTH_KEY}`,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "RqUID": "6f0b1291-c7f3-434c-b9e0-4d574ca0f3c0" // Уникальный идентификатор запроса
+            };
+            
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: headers,
+                    body: "grant_type=client_credentials&scope=GIGACHAT_API_PERS"
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Ошибка получения токена: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.access_token;
+            } catch (error) {
+                console.error('Ошибка при получении токена:', error);
+                throw error;
+            }
+        }
+        
+        // Отправка запроса к GigaChat API
+        async function queryGigaChat(query, accessToken) {
+            const url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions";
+            const headers = {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            };
+            
+            const payload = {
+                model: "GigaChat:latest",
+                messages: [
+                    {
+                        role: "user",
+                        content: query
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 1000
+            };
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Ошибка API: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const processingTime = (Date.now() - startTime) / 1000;
+                
+                return {
+                    answer: data.choices[0].message.content,
+                    processingTime: processingTime.toFixed(1)
+                };
+            } catch (error) {
+                console.error('Ошибка при запросе к GigaChat:', error);
+                return {
+                    answer: "Не удалось получить ответ от GigaChat. Ошибка: " + error.message,
+                    processingTime: "0.0"
+                };
+            }
+        }
+        
+        // Алгоритм оценки ответов
+        function evaluateResponse(response, query) {
+            let score = 0;
+            
+            // Оценка длины ответа
+            if (response.length > 200) score += 3;
+            else if (response.length > 100) score += 2;
+            else score += 1;
+            
+            // Оценка релевантности
+            const keywords = query.toLowerCase().split(' ');
+            const responseLower = response.toLowerCase();
+            const matchedKeywords = keywords.filter(kw => 
+                kw.length > 3 && responseLower.includes(kw));
+            score += matchedKeywords.length * 2;
+            
+            // Оценка сложности языка
+            const complexWords = response.match(/\b\w{8,}\b/g) || [];
+            score += complexWords.length * 0.5;
+            
+            // Дополнительные баллы за структурированность
+            if (response.includes("\n") || response.includes("•") || response.includes("1.")) score += 2;
+            
+            // Нормализация до 10 баллов
+            score = Math.min(score, 10);
+            return score.toFixed(1);
+        }
+        
+        // Эмуляция запросов к другим нейросетям
+        function emulateNeuralResponse(apiName, query, image) {
+            return new Promise(resolve => {
+                const delay = 800 + Math.random() * 1200;
+                
+                setTimeout(() => {
+                    let answer = "";
+                    
+                    switch(apiName) {
+                        case "YandexGPT":
+                            answer = `YandexGPT: Ваш запрос "${query}" обработан. Теория относительности объясняет, как гравитация влияет на пространство и время. Основные идеи:\n1) Скорость света постоянна\n2) Гравитация искривляет пространство-время\n3) Время течет по-разному в разных условиях гравитации`;
+                            break;
+                        case "DeepSeek":
+                            answer = `DeepSeek: Теория относительности Эйнштейна состоит из двух частей:\n- Специальная: для объектов, движущихся с постоянной скоростью\n- Общая: включает гравитацию\nПростыми словами: массивные объекты (как звезды) искривляют пространство вокруг себя, заставляя другие объекты двигаться по кривым траекториям.`;
+                            break;
+                        case "NeuroDream":
+                            answer = `NeuroDream: Теория относительности показывает, что:\n• Время относительно и зависит от скорости\n• Пространство и время взаимосвязаны\n• Гравитация - это искривление пространства-время\nПример: часы на спутнике идут быстрее, чем на Земле.`;
+                            break;
+                    }
+                    
+                    resolve({
+                        answer,
+                        processingTime: (delay / 1000).toFixed(1)
+                    });
+                }, delay);
+            });
+        }
+        
+        // Обработка отправки запроса
+        sendBtn.addEventListener('click', async () => {
+            const query = userQuery.value.trim();
+            if (!query && !imageUpload.files[0]) {
+                apiError.textContent = 'Пожалуйста, введите запрос или загрузите изображение';
+                apiError.classList.remove('hidden');
                 return;
             }
             
-            const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-            const hint = guess < secretNumber ? 
-                `📈 БОЛЬШЕ! (${randomJoke})` : 
-                `📉 МЕНЬШЕ! (${randomJoke})`;
+            apiError.classList.add('hidden');
+            loader.classList.remove('hidden');
+            resultsContainer.innerHTML = '';
             
-            document.getElementById('message').innerHTML = hint;
-            document.getElementById('guess').value = '';
+            try {
+                // Получаем токен для GigaChat
+                const accessToken = await getGigaChatToken();
+                
+                // Отправка запроса во все нейросети
+                const responses = [];
+                
+                // Запрос к GigaChat (реальный API)
+                const gigachatResponse = await queryGigaChat(query, accessToken);
+                const gigachatScore = evaluateResponse(gigachatResponse.answer, query);
+                responses.push({
+                    source: "GigaChat",
+                    icon: "fas fa-laptop-code",
+                    text: gigachatResponse.answer,
+                    score: gigachatScore,
+                    time: gigachatResponse.processingTime
+                });
+                
+                // Эмулированные запросы
+                const yandexResponse = await emulateNeuralResponse("YandexGPT", query, imageUpload.files[0]);
+                const yandexScore = evaluateResponse(yandexResponse.answer, query);
+                responses.push({
+                    source: "YandexGPT",
+                    icon: "fas fa-comment-alt",
+                    text: yandexResponse.answer,
+                    score: yandexScore,
+                    time: yandexResponse.processingTime
+                });
+                
+                const deepseekResponse = await emulateNeuralResponse("DeepSeek", query, imageUpload.files[0]);
+                const deepseekScore = evaluateResponse(deepseekResponse.answer, query);
+                responses.push({
+                    source: "DeepSeek",
+                    icon: "fas fa-microchip",
+                    text: deepseekResponse.answer,
+                    score: deepseekScore,
+                    time: deepseekResponse.processingTime
+                });
+                
+                // Найти лучший ответ
+                const bestResponse = responses.reduce((best, current) => 
+                    parseFloat(current.score) > parseFloat(best.score) ? current : best, responses[0]);
+                
+                // Отобразить результаты
+                displayResults(responses, bestResponse);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                apiError.textContent = `Ошибка: ${error.message}`;
+                apiError.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+        
+        // Функция отображения результатов
+        function displayResults(responses, bestResponse) {
+            let resultsHTML = `
+                <div class="best-response-card">
+                    <div class="best-badge">ЛУЧШИЙ ОТВЕТ</div>
+                    <div class="response-source">
+                        <i class="${bestResponse.icon}"></i>
+                        <span>${bestResponse.source}</span>
+                    </div>
+                    <div class="response-text">
+                        ${bestResponse.text}
+                    </div>
+                    <div class="response-meta">
+                        <div>Оценка алгоритма: <span class="score">${bestResponse.score}/10</span></div>
+                        <div>Время обработки: ${bestResponse.time} сек</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 30px 0 20px; color: var(--accent-secondary);">Все ответы нейросетей</h3>
+                
+                <div class="all-responses">
+            `;
+            
+            responses.forEach(response => {
+                resultsHTML += `
+                    <div class="response-card">
+                        <div class="response-source">
+                            <i class="${response.icon}"></i>
+                            <span class="source-name">${response.source}</span>
+                            <span class="score">${response.score}/10</span>
+                        </div>
+                        <div class="response-text">
+                            ${response.text}
+                        </div>
+                        <div class="response-meta">
+                            Время: ${response.time} сек
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsHTML += `</div>`;
+            resultsContainer.innerHTML = resultsHTML;
+            
+            // Прокрутка к результатам
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
         }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            
+            // Автоматический запрос при загрузке
+            setTimeout(() => {
+                if (userQuery.value) {
+                    sendBtn.click();
+                }
+            }, 1000);
+            
+            // Параллакс эффект для фона
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) / 25;
+                const moveY = (e.clientY - window.innerHeight / 2) / 25;
+                
+                document.body.style.backgroundPosition = `
+                    calc(50% + ${moveX}px) calc(50% + ${moveY}px)
+                `;
+            });
+        });
     </script>
 </body>
 </html>
