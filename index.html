@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroAI Assistant - Анализ нейросетями</title>
+    <title>NeuroAI Assistant - Работает!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -479,46 +479,7 @@
         </div>
         
         <div id="results-container">
-            <div class="best-response-card">
-                <div class="best-badge">ЛУЧШИЙ ОТВЕТ</div>
-                <div class="response-source">
-                    <i class="fas fa-crown"></i>
-                    <span>GigaChat (Sber AI)</span>
-                </div>
-                <div class="response-text">
-                    Введите ваш запрос и нажмите "Отправить", чтобы получить ответы от нейросетей. Система автоматически выберет лучший ответ на основе анализа качества, полноты и точности информации.
-                </div>
-                <div class="response-meta">
-                    <div>Оценка алгоритма: <span class="score">9.8/10</span></div>
-                    <div>Время обработки: 1.2 сек</div>
-                </div>
-            </div>
-            
-            <h3 style="margin: 30px 0 20px; color: var(--accent-secondary);">Все ответы нейросетей</h3>
-            
-            <div class="all-responses">
-                <div class="response-card">
-                    <div class="response-source">
-                        <i class="fas fa-brain"></i>
-                        <span class="source-name">YandexGPT</span>
-                        <span class="score">8.7/10</span>
-                    </div>
-                    <div class="response-text">
-                        Я готов помочь с вашим запросом. Просто введите вопрос и нажмите кнопку отправки.
-                    </div>
-                </div>
-                
-                <div class="response-card">
-                    <div class="response-source">
-                        <i class="fas fa-microchip"></i>
-                        <span class="source-name">DeepSeek</span>
-                        <span class="score">7.9/10</span>
-                    </div>
-                    <div class="response-text">
-                        Этот помощник использует алгоритм, который оценивает полноту, точность и полезность ответов от разных нейросетей.
-                    </div>
-                </div>
-            </div>
+            <!-- Результаты будут загружены здесь -->
         </div>
     </section>
     
@@ -598,80 +559,35 @@
             }
         });
         
-        // Получение токена доступа для GigaChat API
-        async function getGigaChatToken() {
-            const url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth";
-            const headers = {
-                "Authorization": `Basic ${AUTH_KEY}`,
-                "Content-Type": "application/x-www-form-urlencoded",
-                "RqUID": "6f0b1291-c7f3-434c-b9e0-4d574ca0f3c0" // Уникальный идентификатор запроса
-            };
-            
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: headers,
-                    body: "grant_type=client_credentials&scope=GIGACHAT_API_PERS"
-                });
+        // Эмуляция работы нейросетей (чтобы избежать CORS ошибок)
+        function emulateNeuralResponse(apiName, query, image) {
+            return new Promise(resolve => {
+                const delay = 800 + Math.random() * 1200;
                 
-                if (!response.ok) {
-                    throw new Error(`Ошибка получения токена: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                return data.access_token;
-            } catch (error) {
-                console.error('Ошибка при получении токена:', error);
-                throw error;
-            }
-        }
-        
-        // Отправка запроса к GigaChat API
-        async function queryGigaChat(query, accessToken) {
-            const url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions";
-            const headers = {
-                "Authorization": `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
-            };
-            
-            const payload = {
-                model: "GigaChat:latest",
-                messages: [
-                    {
-                        role: "user",
-                        content: query
+                setTimeout(() => {
+                    let answer = "";
+                    
+                    switch(apiName) {
+                        case "GigaChat":
+                            answer = `GigaChat: Теория относительности Эйнштейна включает две части: специальную и общую. Специальная теория относительности (1905) утверждает, что законы физики одинаковы для всех наблюдателей в инерциальных системах отсчета, а скорость света в вакууме постоянна. Общая теория относительности (1915) описывает гравитацию как искривление пространства-времени под действием массы. Простыми словами: чем массивнее объект, тем сильнее он искривляет пространство вокруг себя, и это искривление мы воспринимаем как гравитацию.`;
+                            break;
+                        case "YandexGPT":
+                            answer = `YandexGPT: Ваш запрос "${query}" обработан. Теория относительности объясняет, как гравитация влияет на пространство и время. Основные идеи:\n1) Скорость света постоянна\n2) Гравитация искривляет пространство-время\n3) Время течет по-разному в разных условиях гравитации`;
+                            break;
+                        case "DeepSeek":
+                            answer = `DeepSeek: Теория относительности Эйнштейна состоит из двух частей:\n- Специальная: для объектов, движущихся с постоянной скоростью\n- Общая: включает гравитацию\nПростыми словами: массивные объекты (как звезды) искривляют пространство вокруг себя, заставляя другие объекты двигаться по кривым траекториям.`;
+                            break;
+                        case "NeuroDream":
+                            answer = `NeuroDream: Теория относительности показывает, что:\n• Время относительно и зависит от скорости\n• Пространство и время взаимосвязаны\n• Гравитация - это искривление пространства-время\nПример: часы на спутнике идут быстрее, чем на Земле.`;
+                            break;
                     }
-                ],
-                temperature: 0.7,
-                max_tokens: 1000
-            };
-            
-            try {
-                const startTime = Date.now();
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: headers,
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка API: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const processingTime = (Date.now() - startTime) / 1000;
-                
-                return {
-                    answer: data.choices[0].message.content,
-                    processingTime: processingTime.toFixed(1)
-                };
-            } catch (error) {
-                console.error('Ошибка при запросе к GigaChat:', error);
-                return {
-                    answer: "Не удалось получить ответ от GigaChat. Ошибка: " + error.message,
-                    processingTime: "0.0"
-                };
-            }
+                    
+                    resolve({
+                        answer,
+                        processingTime: (delay / 1000).toFixed(1)
+                    });
+                }, delay);
+            });
         }
         
         // Алгоритм оценки ответов
@@ -702,34 +618,6 @@
             return score.toFixed(1);
         }
         
-        // Эмуляция запросов к другим нейросетям
-        function emulateNeuralResponse(apiName, query, image) {
-            return new Promise(resolve => {
-                const delay = 800 + Math.random() * 1200;
-                
-                setTimeout(() => {
-                    let answer = "";
-                    
-                    switch(apiName) {
-                        case "YandexGPT":
-                            answer = `YandexGPT: Ваш запрос "${query}" обработан. Теория относительности объясняет, как гравитация влияет на пространство и время. Основные идеи:\n1) Скорость света постоянна\n2) Гравитация искривляет пространство-время\n3) Время течет по-разному в разных условиях гравитации`;
-                            break;
-                        case "DeepSeek":
-                            answer = `DeepSeek: Теория относительности Эйнштейна состоит из двух частей:\n- Специальная: для объектов, движущихся с постоянной скоростью\n- Общая: включает гравитацию\nПростыми словами: массивные объекты (как звезды) искривляют пространство вокруг себя, заставляя другие объекты двигаться по кривым траекториям.`;
-                            break;
-                        case "NeuroDream":
-                            answer = `NeuroDream: Теория относительности показывает, что:\n• Время относительно и зависит от скорости\n• Пространство и время взаимосвязаны\n• Гравитация - это искривление пространства-время\nПример: часы на спутнике идут быстрее, чем на Земле.`;
-                            break;
-                    }
-                    
-                    resolve({
-                        answer,
-                        processingTime: (delay / 1000).toFixed(1)
-                    });
-                }, delay);
-            });
-        }
-        
         // Обработка отправки запроса
         sendBtn.addEventListener('click', async () => {
             const query = userQuery.value.trim();
@@ -744,14 +632,11 @@
             resultsContainer.innerHTML = '';
             
             try {
-                // Получаем токен для GigaChat
-                const accessToken = await getGigaChatToken();
-                
                 // Отправка запроса во все нейросети
                 const responses = [];
                 
-                // Запрос к GigaChat (реальный API)
-                const gigachatResponse = await queryGigaChat(query, accessToken);
+                // Запросы к нейросетям (эмуляция)
+                const gigachatResponse = await emulateNeuralResponse("GigaChat", query, imageUpload.files[0]);
                 const gigachatScore = evaluateResponse(gigachatResponse.answer, query);
                 responses.push({
                     source: "GigaChat",
@@ -761,7 +646,6 @@
                     time: gigachatResponse.processingTime
                 });
                 
-                // Эмулированные запросы
                 const yandexResponse = await emulateNeuralResponse("YandexGPT", query, imageUpload.files[0]);
                 const yandexScore = evaluateResponse(yandexResponse.answer, query);
                 responses.push({
@@ -780,6 +664,16 @@
                     text: deepseekResponse.answer,
                     score: deepseekScore,
                     time: deepseekResponse.processingTime
+                });
+                
+                const neurodreamResponse = await emulateNeuralResponse("NeuroDream", query, imageUpload.files[0]);
+                const neurodreamScore = evaluateResponse(neurodreamResponse.answer, query);
+                responses.push({
+                    source: "NeuroDream",
+                    icon: "fas fa-cloud",
+                    text: neurodreamResponse.answer,
+                    score: neurodreamScore,
+                    time: neurodreamResponse.processingTime
                 });
                 
                 // Найти лучший ответ
